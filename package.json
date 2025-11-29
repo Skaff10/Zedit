@@ -1,0 +1,24 @@
+{
+  "name": "zedit",
+  "version": "1.0.0",
+  "description": "'AI powered Workplace'",
+  "license": "MIT",
+  "author": "Albab Farabi",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "server": "nodemon server/server.js",
+    "client": "npm run dev --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
