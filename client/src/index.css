@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+@theme {
+  --color-z-blue: #2563eb;
+  --color-z-dark: #0f172a;
+  --color-z-gray: #f3f4f6;
+  --color-z-text: #1f2937;
+  --color-z-text-secondary: #6b7280;
+  --color-z-sidebar: #1e293b;
+}
+
+body {
+  @apply bg-z-gray text-z-text font-sans antialiased;
+}
