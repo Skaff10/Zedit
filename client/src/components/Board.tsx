@@ -86,7 +86,7 @@ const ProjectCard: React.FC<{
       )}
 
       <p className="text-xs text-gray-400">
-        Updated intro paragraph • {updated}
+        Updated intro paragraph • {updated} 
       </p>
     </div>
   );
