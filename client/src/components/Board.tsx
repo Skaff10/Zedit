@@ -11,9 +11,8 @@ export const Board: React.FC = () => {
       </div>
 
       <div className="flex gap-6 h-[calc(100vh-12rem)] min-w-[800px]">
-        <Column title="Drafts" >
+        <Column title="Drafts">
           <NewZeditCard />
-          
         </Column>
 
         {/* <Column title="In Review" >
@@ -38,7 +37,9 @@ const Column: React.FC<{
     <div className="flex-1 flex flex-col min-w-[280px]">
       <div className="flex justify-between items-center mb-4 px-1">
         <h3 className="font-semibold text-z-text">{title}</h3>
-        <button className="text-gray-400 hover:text-gray-600 cursor-pointer">•••</button>
+        <button className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          •••
+        </button>
       </div>
       <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
         {children}
@@ -86,7 +87,7 @@ const ProjectCard: React.FC<{
       )}
 
       <p className="text-xs text-gray-400">
-        Updated intro paragraph • {updated} 
+        Updated intro paragraph • {updated}
       </p>
     </div>
   );
