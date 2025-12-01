@@ -20,10 +20,10 @@ const FocusEditor: React.FC = () => {
     }`;
 
   return (
-    <div className=" bg-z-gray w-full h-screen px-4 py-10">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div className="bg-z-gray w-full h-screen  flex justify-center py-5">
+      <div className="w-full max-w-5xl bg-white rounded-2xl flex flex-col pt-1 overflow-hidden">
         {/* Top white heading bar (empty for now) */}
-        <div className="h-16 bg-white border-b border-gray-100" />
+        <div className="h-16 bg-gray-200 self-center  border rounded-r-3xl rounded-l-3xl w-3/4 border-z-gray" />
 
         <div className="relative p-8">
           <BubbleMenu editor={editor}>
