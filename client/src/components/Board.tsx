@@ -48,14 +48,30 @@ const Column: React.FC<{
   );
 };
 
-const NewZeditCard = () => (
-  <button className="h-32 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-z-blue hover:text-z-blue hover:bg-blue-50 transition-all group cursor-pointer">
-    <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
-      +
-    </span>
-    <span className="font-medium">Create New Zedit</span>
-  </button>
-);
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+
+const NewZeditCard = () => {
+  const navigate = useNavigate();
+
+  return (
+    <motion.button
+      layoutId="focus-editor-card"
+      onClick={() => navigate("/focus")}
+      className="h-32 w-full border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-z-blue hover:text-z-blue hover:bg-blue-50 transition-colors group cursor-pointer bg-white"
+    >
+      <motion.span
+        layoutId="focus-editor-plus"
+        className="text-2xl mb-1 group-hover:scale-110 transition-transform"
+      >
+        +
+      </motion.span>
+      <motion.span layoutId="focus-editor-text" className="font-medium">
+        Create New Zedit
+      </motion.span>
+    </motion.button>
+  );
+};
 
 const ProjectCard: React.FC<{
   title: string;
