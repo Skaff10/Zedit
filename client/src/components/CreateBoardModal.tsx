@@ -54,7 +54,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
                 </h2>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                 >
                   <IoClose size={24} />
                 </button>
@@ -109,7 +109,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200"
+                  className="cursor-pointer w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200"
                 >
                   Create Board
                 </button>

@@ -3,6 +3,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import { motion } from "framer-motion";
+import { Sidebar } from "../components/Sidebar";
 
 const FocusEditor: React.FC = () => {
   const editor = useEditor({
@@ -22,6 +23,7 @@ const FocusEditor: React.FC = () => {
 
   return (
     <div className="bg-z-gray w-full h-screen flex justify-center py-5">
+      <Sidebar />
       <motion.div
         layoutId="focus-editor-card"
         className="w-full max-w-5xl bg-white rounded-2xl flex flex-col pt-1 overflow-hidden shadow-xl"
