@@ -15,6 +15,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "Please add a password"],
     },
+    avatarColor: {
+      type: String,
+      default: "#8F8FFF",
+    },
   },
   {
     timestamps: true,
