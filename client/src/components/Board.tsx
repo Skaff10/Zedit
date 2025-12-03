@@ -1,21 +1,51 @@
 import React from "react";
+import { CreateBoardModal } from "./CreateBoardModal";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 export const Board: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [boardKey, setBoardKey] = React.useState(0);
+
+  const handleCreateBoard = (boardName: string) => {
+    console.log("Creating board:", boardName);
+    setIsModalOpen(false);
+    // Trigger swipe animation by updating key
+    setTimeout(() => setBoardKey((prev) => prev + 1), 300); // Small delay to allow modal to close first
+  };
+
   return (
-    <div className="flex-1 p-8 overflow-x-auto">
+    <div className="flex-1 p-8 overflow-x-hidden relative">
+      <CreateBoardModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreate={handleCreateBoard}
+      />
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-z-text">Z-Board</h1>
-        <button className="bg-z-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-z-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer"
+        >
           <span>+</span> New Board
         </button>
       </div>
 
-      <div className="flex gap-6 h-[calc(100vh-12rem)] min-w-[800px]">
-        <Column title="Drafts">
-          <NewZeditCard />
-        </Column>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={boardKey}
+          initial={{ x: 300, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: -300, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          className="flex gap-6 h-[calc(100vh-12rem)] min-w-[800px]"
+        >
+          <Column title="Drafts">
+            <NewZeditCard />
+          </Column>
 
-        {/* <Column title="In Review" >
+          {/* <Column title="In Review" >
           
             
         </Column>
@@ -23,7 +53,8 @@ export const Board: React.FC = () => {
         <Column title="Published/Stable" >
           
         </Column> */}
-      </div>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 };
@@ -47,9 +78,6 @@ const Column: React.FC<{
     </div>
   );
 };
-
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 
 const NewZeditCard = () => {
   const navigate = useNavigate();
