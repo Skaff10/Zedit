@@ -1,4 +1,5 @@
 import React from "react";
+import { FaCheck, FaShare } from "react-icons/fa6";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
@@ -27,22 +28,60 @@ const FocusEditor: React.FC = () => {
       <motion.div
         layoutId="focus-editor-card"
         className="w-full max-w-5xl bg-white rounded-2xl flex flex-col pt-1 overflow-hidden shadow-xl"
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ type: "spring", stiffness: 150, damping: 25 }}
       >
         {/* Top white heading bar (empty for now) */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="h-16 bg-gray-200 self-center border rounded-r-3xl rounded-l-3xl w-3/4 border-z-gray flex items-center justify-center"
+          transition={{ delay: 0.3 }}
+          className="h-16 bg-gray-50 self-center border rounded-full w-[90%] border-gray-200 flex items-center justify-between px-2 shadow-sm mt-4"
         >
-          {/* Placeholder for Title Input */}
-          <input
-            type="text"
-            placeholder="Document Title"
-            className="bg-transparent border-none outline-none text-center font-medium text-gray-700 w-full px-4"
-            autoFocus
-          />
+          {/* Left: Document Title */}
+          <div className="flex-1 flex justify-start">
+            <input
+              type="text"
+              placeholder="Document Title"
+              className="bg-transparent border-none outline-none font-bold text-gray-800 text-lg px-4 w-full max-w-xs"
+            />
+          </div>
+
+          {/* Center: Authors */}
+          {/* <div className="flex-1 flex justify-center items-center -space-x-3">
+            {[1, 2, 3, 4].map((_, i) => (
+              <div
+                key={i}
+                className={`w-10 h-10 rounded-full border-2 border-white overflow-hidden relative z-[${
+                  10 - i
+                }] ring-2 ${
+                  [
+                    "ring-blue-500",
+                    "ring-green-500",
+                    "ring-purple-500",
+                    "ring-orange-500",
+                  ][i]
+                }`}
+              >
+                <img
+                  src={`https://i.pravatar.cc/150?img=${10 + i}`}
+                  alt="Author"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div> */}
+
+          {/* Right: Actions */}
+          <div className="flex-1 flex justify-end items-center gap-3 pr-2">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer bg-blue-600 hover:bg-blue-700 text-white ">
+              <FaCheck className="text-white" />
+              <span>Commit</span>
+            </button>
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700">
+              <FaShare className="text-gray-600" />
+              <span>Share</span>
+            </button>
+          </div>
         </motion.div>
 
         <motion.div

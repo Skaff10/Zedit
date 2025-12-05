@@ -11,7 +11,7 @@ export const Board: React.FC = () => {
     console.log("Creating board:", boardName);
     setIsModalOpen(false);
     // Trigger swipe animation by updating key
-    setTimeout(() => setBoardKey((prev) => prev + 1), 300); // Small delay to allow modal to close first
+    setTimeout(() => setBoardKey((prev) => prev + 1), 3000); // Small delay to allow modal to close first
   };
 
   return (
@@ -38,7 +38,7 @@ export const Board: React.FC = () => {
           initial={{ x: 300, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 25 }}
+          transition={{ type: "spring", stiffness: 100, damping: 25 }}
           className="flex gap-6 h-[calc(100vh-12rem)] min-w-[800px]"
         >
           <Column title="Drafts">
