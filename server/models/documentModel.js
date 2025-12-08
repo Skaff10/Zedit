@@ -26,5 +26,10 @@ const documentSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  status: {
+    type: String,
+    enum: ["draft", "review", "published", "stable"],
+    default: "draft",
+  },
 });
 module.exports = mongoose.model("Document", documentSchema);

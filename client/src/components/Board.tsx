@@ -1,21 +1,51 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { CreateBoardModal } from "./CreateBoardModal";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useDocStore } from "../store/docStore";
 
 export const Board: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [boardKey, setBoardKey] = React.useState(0);
+  const { documents, getUserDocuments, updateDocument } = useDocStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    getUserDocuments();
+  }, [getUserDocuments]);
 
   const handleCreateBoard = (boardName: string) => {
     console.log("Creating board:", boardName);
     setIsModalOpen(false);
-    // Trigger swipe animation by updating key
-    setTimeout(() => setBoardKey((prev) => prev + 1), 3000); // Small delay to allow modal to close first
+    setTimeout(() => setBoardKey((prev) => prev + 1), 3000);
   };
 
+  const handleDragEnd = async (docId: string, info: any) => {
+    const x = info.point.x;
+    // Simple improved heuristic for column detection based on screen width shares
+    // This assumes 3 generic columns. A more robust solution uses DOM refs.
+    const screenWidth = window.innerWidth;
+    const colWidth = screenWidth / 3;
+
+    let newStatus = "";
+    if (x < colWidth) newStatus = "draft";
+    else if (x < colWidth * 2) newStatus = "review";
+    else newStatus = "published"; // or stable
+
+    if (newStatus) {
+      await updateDocument(docId, { status: newStatus });
+      getUserDocuments(); // Refresh to ensure UI sync
+    }
+  };
+
+  const drafts = documents.filter((d) => d.status === "draft");
+  const inReview = documents.filter((d) => d.status === "review");
+  const published = documents.filter(
+    (d) => d.status === "published" || d.status === "stable"
+  );
+
   return (
-    <div className="flex-1 p-8 overflow-x-hidden relative">
+    <div className="flex-1 p-8 overflow-x-hidden relative h-[calc(100vh-4rem)]">
       <CreateBoardModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -39,20 +69,30 @@ export const Board: React.FC = () => {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: -300, opacity: 0 }}
           transition={{ type: "spring", stiffness: 100, damping: 25 }}
-          className="flex gap-6 h-[calc(100vh-12rem)] min-w-[800px]"
+          className="flex gap-6 h-full min-w-[800px] overflow-x-auto"
         >
-          <Column title="Drafts">
+          <Column title="Drafts" status="draft" onDrop={handleDragEnd}>
             <NewZeditCard />
+            {drafts.map((doc) => (
+              <ProjectCard key={doc._id} doc={doc} onDragEnd={handleDragEnd} />
+            ))}
           </Column>
 
-          {/* <Column title="In Review" >
-          
-            
-        </Column>
+          <Column title="In Review" status="review" onDrop={handleDragEnd}>
+            {inReview.map((doc) => (
+              <ProjectCard key={doc._id} doc={doc} onDragEnd={handleDragEnd} />
+            ))}
+          </Column>
 
-        <Column title="Published/Stable" >
-          
-        </Column> */}
+          <Column
+            title="Published"
+            status="published"
+            onDrop={handleDragEnd}
+          >
+            {published.map((doc) => (
+              <ProjectCard key={doc._id} doc={doc} onDragEnd={handleDragEnd} />
+            ))}
+          </Column>
         </motion.div>
       </AnimatePresence>
     </div>
@@ -61,18 +101,19 @@ export const Board: React.FC = () => {
 
 const Column: React.FC<{
   title: string;
-  count?: number;
+  status: string;
   children: React.ReactNode;
-}> = ({ title, count, children }) => {
+  onDrop: (id: string, info: any) => void;
+}> = ({ title, children }) => {
   return (
-    <div className="flex-1 flex flex-col min-w-[280px]">
+    <div className="flex-1 flex flex-col min-w-[300px] bg-gray-50/50 rounded-xl p-4 border border-gray-100">
       <div className="flex justify-between items-center mb-4 px-1">
         <h3 className="font-semibold text-z-text">{title}</h3>
         <button className="text-gray-400 hover:text-gray-600 cursor-pointer">
           •••
         </button>
       </div>
-      <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+      <div className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4 flex-1">
         {children}
       </div>
     </div>
@@ -84,9 +125,9 @@ const NewZeditCard = () => {
 
   return (
     <motion.button
-      layoutId="focus-editor-card"
+      layoutId="focus-editor-new"
       onClick={() => navigate("/focus")}
-      className="h-32 w-full border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-z-blue hover:text-z-blue hover:bg-blue-50 transition-colors group cursor-pointer bg-white"
+      className="h-32 w-full border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-z-blue hover:text-z-blue hover:bg-blue-50 transition-colors group cursor-pointer bg-white shrink-0"
     >
       <motion.span
         layoutId="focus-editor-plus"
@@ -102,37 +143,56 @@ const NewZeditCard = () => {
 };
 
 const ProjectCard: React.FC<{
-  title: string;
-  authors?: string[];
-  updated: string;
-  status?: "draft" | "review" | "published";
-}> = ({ title, authors, updated, status = "draft" }) => {
-  return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
-      <h4 className="font-semibold text-z-text mb-3">{title}</h4>
+  doc: any;
+  onDragEnd: (id: string, info: any) => void;
+}> = ({ doc, onDragEnd }) => {
+  const controls = useDragControls();
+  const navigate = useNavigate();
+  const isPublished = doc.status === "published" || doc.status === "stable";
 
-      {status === "published" ? (
+  return (
+    <motion.div
+      layoutId={`focus-editor-${doc._id}`}
+      drag={!isPublished}
+      dragControls={controls}
+      dragListener={!isPublished}
+      dragConstraints={{ top: 0, bottom: 0, left: -500, right: 500 }}
+      dragElastic={0.2}
+      whileDrag={{ scale: 1.05, zIndex: 100, rotate: 2 }}
+      onDragEnd={(_e, info) => onDragEnd(doc._id, info)}
+      onTap={() => {
+        console.log("Card tapped, navigating to:", doc._id);
+        navigate("/focus/" + doc._id);
+      }}
+      className={`bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-pointer shrink-0 ${
+        isPublished ? "opacity-90" : "cursor-grab active:cursor-grabbing"
+      }`}
+    >
+      <div className="flex justify-between items-start mb-2">
+        <h4 className="font-semibold text-z-text mb-3 truncate max-w-[80%]">
+          {doc.title}
+        </h4>
+      </div>
+
+      {isPublished ? (
         <div className="flex items-center gap-2 mb-3">
           <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-green-600">
             ✓
           </div>
+          <span className="text-xs text-green-600 font-medium">Published</span>
         </div>
       ) : (
         <div className="flex -space-x-2 mb-3">
-          {authors?.map((src, i) => (
-            <div
-              key={i}
-              className="w-6 h-6 rounded-full border-2 border-white bg-gray-200 overflow-hidden"
-            >
-              <img src={src} alt="" className="w-full h-full object-cover" />
-            </div>
-          ))}
+          {/* Mock authors for now as API might not return full populated paths yet */}
+          <div className="w-6 h-6 rounded-full border-2 border-white bg-blue-100 text-[10px] flex items-center justify-center font-bold text-blue-600">
+            {doc.owner?.name?.[0] || "U"}
+          </div>
         </div>
       )}
 
       <p className="text-xs text-gray-400">
-        Updated intro paragraph • {updated}
+        Updated • {new Date(doc.lastModified).toLocaleDateString()}
       </p>
-    </div>
+    </motion.div>
   );
 };
