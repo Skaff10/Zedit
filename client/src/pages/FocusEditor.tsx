@@ -3,8 +3,14 @@ import { FaCheck, FaShare } from "react-icons/fa6";
 import { useEditor, EditorContent } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Color from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
+import Image from "@tiptap/extension-image";
+import FontFamily from "@tiptap/extension-font-family";
 import { motion } from "framer-motion";
 import { Sidebar } from "../components/Sidebar";
+import { EditorToolbar } from "../components/EditorToolbar";
 import { useDocStore } from "../store/docStore";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -18,7 +24,17 @@ const FocusEditor: React.FC = () => {
   const [isReadOnly, setIsReadOnly] = useState(false);
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Underline,
+      TextStyle,
+      Color,
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+      }),
+      FontFamily,
+    ],
     content: "<p>Start typing or press '/' for AI…</p>",
     autofocus: "end",
     editable: !isReadOnly,
@@ -90,8 +106,12 @@ const FocusEditor: React.FC = () => {
     }`;
 
   return (
-    <div className="bg-z-gray w-full h-screen flex justify-center py-5">
+    <div className="bg-z-gray w-full h-screen flex justify-center py-5 gap-4">
       <Sidebar />
+
+      {/* Left Toolbar - Outside Document */}
+      {!isReadOnly && <EditorToolbar editor={editor} disabled={isReadOnly} />}
+
       <motion.div
         layoutId={`focus-editor-${id || "new"}`}
         className="w-full max-w-5xl bg-white rounded-2xl flex flex-col pt-1 overflow-hidden shadow-xl"
@@ -171,6 +191,7 @@ const FocusEditor: React.FC = () => {
             </BubbleMenu>
           )}
 
+          {/* Editor Content */}
           <div className="tiptap-editor h-full">
             <EditorContent editor={editor} />
           </div>

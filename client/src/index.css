@@ -40,3 +40,22 @@ body {
   color: rgb(107 114 128);
   margin: 0.75rem 0;
 }
+
+/* Image styling */
+.tiptap-editor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+/* Underline styling */
+.tiptap-editor .ProseMirror u {
+  text-decoration: underline;
+}
+
+/* Font family reset for spans */
+.tiptap-editor .ProseMirror span[style*="font-family"] {
+  font-family: inherit;
+}
