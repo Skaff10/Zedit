@@ -6,6 +6,8 @@ interface User {
   _id: string;
   name: string;
   email: string;
+  profilePic?: string;
+  theme?: string;
   token: string;
 }
 
@@ -23,6 +25,9 @@ interface AuthState {
   login: (userData: { email: string; password: string }) => Promise<void>;
   logout: () => void;
   reset: () => void;
+  updateProfile: (formData: FormData) => Promise<void>;
+  updatePassword: (passwordData: any) => Promise<void>;
+  updateTheme: (theme: string) => Promise<void>;
 }
 
 // Get user from localStorage
@@ -111,5 +116,66 @@ export const useAuthStore = create<AuthState>((set) => ({
       isLoading: false,
       message: "",
     });
+  },
+  updateProfile: async (formData) => {
+    try {
+      set({ isLoading: true });
+      const user = await authService.updateProfile(
+        formData,
+        useAuthStore.getState().user?.token || ""
+      );
+      set({
+        user,
+        isLoading: false,
+        isSuccess: true,
+        isError: false,
+      });
+      toast.success("Profile updated!");
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isError: true, isLoading: false, message });
+      toast.error(message);
+    }
+  },
+  updatePassword: async (passwordData) => {
+    try {
+      set({ isLoading: true });
+      await authService.updatePassword(
+        passwordData,
+        useAuthStore.getState().user?.token || ""
+      );
+      set({ isLoading: false, isSuccess: true, isError: false });
+      toast.success("Password updated!");
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({ isError: true, isLoading: false, message });
+      toast.error(message);
+    }
+  },
+  updateTheme: async (theme) => {
+    try {
+      await authService.updateTheme(
+        theme,
+        useAuthStore.getState().user?.token || ""
+      );
+      const user = useAuthStore.getState().user;
+      if (user) {
+        const updatedUser = { ...user, theme };
+        set({ user: updatedUser });
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } catch (error: any) {
+      console.error("Failed to update theme on server", error);
+    }
   },
 }));

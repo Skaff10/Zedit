@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import { Sidebar } from "../components/Sidebar";
 import { EditorToolbar } from "../components/EditorToolbar";
 import { useDocStore } from "../store/docStore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const FocusEditor: React.FC = () => {
@@ -21,6 +21,8 @@ const FocusEditor: React.FC = () => {
     useDocStore();
   const navigate = useNavigate();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const boardId = searchParams.get("boardId");
   const [isReadOnly, setIsReadOnly] = useState(false);
 
   const editor = useEditor({
@@ -39,6 +41,16 @@ const FocusEditor: React.FC = () => {
     autofocus: "end",
     editable: !isReadOnly,
   });
+
+  const [, setUpdate] = useState(0);
+  useEffect(() => {
+    if (!editor) return;
+    const update = () => setUpdate((s) => s + 1);
+    editor.on("transaction", update);
+    return () => {
+      editor.off("transaction", update);
+    };
+  }, [editor]);
 
   // Fetch document if ID is present
   useEffect(() => {
@@ -92,7 +104,12 @@ const FocusEditor: React.FC = () => {
         title: title || "Untitled Document",
         content,
         status: "draft",
+        boardId: boardId || undefined,
       });
+      // Navigate back to board if we came from one
+      if (boardId) {
+        navigate(`/board/${boardId}`);
+      }
     }
   };
 
@@ -106,7 +123,7 @@ const FocusEditor: React.FC = () => {
     }`;
 
   return (
-    <div className="bg-z-gray w-full h-screen flex justify-center py-5 gap-4">
+    <div className="bg-z-gray dark:bg-[#0a0a0a] w-full h-screen flex justify-center py-5 gap-4 transition-colors duration-300">
       <Sidebar />
 
       {/* Left Toolbar - Outside Document */}
@@ -114,7 +131,7 @@ const FocusEditor: React.FC = () => {
 
       <motion.div
         layoutId={`focus-editor-${id || "new"}`}
-        className="w-full max-w-5xl bg-white rounded-2xl flex flex-col pt-1 overflow-hidden shadow-xl"
+        className="w-full max-w-5xl bg-white dark:bg-gray-100 rounded-2xl flex flex-col pt-1 overflow-hidden shadow-xl"
         transition={{ type: "spring", stiffness: 150, damping: 25 }}
       >
         {/* Top white heading bar */}

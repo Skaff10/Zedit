@@ -19,6 +19,15 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "#8F8FFF",
     },
+    profilePic: {
+      type: String,
+      default: "",
+    },
+    theme: {
+      type: String,
+      enum: ["light", "dark"],
+      default: "light",
+    },
   },
   {
     timestamps: true,

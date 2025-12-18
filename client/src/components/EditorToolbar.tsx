@@ -57,6 +57,17 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showFontPicker, setShowFontPicker] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [, setUpdate] = useState(0);
+
+  // Force update when editor selection or content changes
+  React.useEffect(() => {
+    if (!editor) return;
+    const update = () => setUpdate((s) => s + 1);
+    editor.on("transaction", update);
+    return () => {
+      editor.off("transaction", update);
+    };
+  }, [editor]);
 
   if (disabled) return null;
 

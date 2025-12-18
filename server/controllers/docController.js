@@ -7,8 +7,21 @@ const createDocument = asyncHandler(async (req, res) => {
     title: req.body.title || "Untitled Document",
     content: req.body.content || {},
     status: req.body.status || "draft",
+    boardId: req.body.boardId || null,
   });
   res.status(201).json(document);
+});
+
+const getDocumentsByBoard = asyncHandler(async (req, res) => {
+  const { boardId } = req.params;
+  const docs = await Document.find({
+    boardId: boardId,
+    $or: [{ owner: req.user._id }, { "collaborators.userId": req.user._id }],
+  })
+    .populate("owner", "name")
+    .sort({ lastModified: -1 });
+
+  res.status(200).json(docs);
 });
 
 const getDocument = asyncHandler(async (req, res) => {
@@ -76,6 +89,7 @@ module.exports = {
   createDocument,
   getDocument,
   getUserDocuments,
+  getDocumentsByBoard,
   updateDocument,
   deleteDocument,
 };

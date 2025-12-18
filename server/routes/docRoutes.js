@@ -11,6 +11,9 @@ const protect = require("../middlewares/auth");
 
 router.route("/").post(protect, createDocument).get(protect, getUserDocuments);
 router
+  .route("/board/:boardId")
+  .get(protect, require("../controllers/docController").getDocumentsByBoard);
+router
   .route("/:id")
   .get(protect, getDocument)
   .put(protect, updateDocument)

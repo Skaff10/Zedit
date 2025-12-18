@@ -1,134 +1,56 @@
 import { create } from "zustand";
-import docService from "../features/docs/docService";
+import boardService from "../features/boards/boardService";
 import { toast } from "react-toastify";
 
-interface Document {
+interface Board {
   _id: string;
-  title: string;
-  content: any;
-  status: "draft" | "review" | "published" | "stable";
-  lastModified: string;
+  name: string;
   owner: { _id: string; name: string } | string;
-  collaborators: any[];
+  collaborators: Array<{ userId: string; permission: string }>;
+  isPrivate: boolean;
+  createdAt: string;
 }
 
-interface DocState {
-  documents: Document[];
+interface BoardState {
+  boards: Board[];
+  currentBoard: Board | null;
   isError: boolean;
   isSuccess: boolean;
   isLoading: boolean;
   message: string;
-  createDocument: (docData: {
-    title: string;
-    content: any;
-    status: string;
-    boardId?: string;
-  }) => Promise<void>;
-  getUserDocuments: () => Promise<void>;
-  getDocumentsByBoard: (boardId: string) => Promise<void>;
-  getDocument: (id: string) => Promise<Document | null>;
-  updateDocument: (
+  createBoard: (boardData: {
+    name: string;
+    isPrivate?: boolean;
+  }) => Promise<Board | null>;
+  getUserBoards: () => Promise<void>;
+  getBoard: (id: string) => Promise<Board | null>;
+  updateBoard: (
     id: string,
-    docData: { title?: string; content?: any; status?: string }
+    boardData: { name?: string; isPrivate?: boolean }
   ) => Promise<void>;
+  deleteBoard: (id: string) => Promise<void>;
   reset: () => void;
 }
 
-export const useDocStore = create<DocState>((set) => ({
-  documents: [],
+export const useBoardStore = create<BoardState>((set) => ({
+  boards: [],
+  currentBoard: null,
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: "",
 
-  createDocument: async (docData) => {
+  createBoard: async (boardData) => {
     try {
       set({ isLoading: true });
-      const doc = await docService.createDocument(docData);
+      const board = await boardService.createBoard(boardData);
       set((state) => ({
-        documents: [doc, ...state.documents],
+        boards: [board, ...state.boards],
         isLoading: false,
         isSuccess: true,
       }));
-      toast.success("Document saved successfully!");
-    } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      set({
-        isError: true,
-        isLoading: false,
-        isSuccess: false,
-        message,
-      });
-      toast.error(message);
-    }
-  },
-
-  getUserDocuments: async () => {
-    try {
-      set({ isLoading: true });
-      const docs = await docService.getUserDocuments();
-      set({
-        documents: docs,
-        isLoading: false,
-        isSuccess: true,
-      });
-    } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      set({
-        isError: true,
-        isLoading: false,
-        isSuccess: false,
-        message,
-      });
-      toast.error(message);
-    }
-  },
-
-  getDocumentsByBoard: async (boardId: string) => {
-    try {
-      set({ isLoading: true });
-      const docs = await docService.getDocumentsByBoard(boardId);
-      set({
-        documents: docs,
-        isLoading: false,
-        isSuccess: true,
-      });
-    } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      set({
-        isError: true,
-        isLoading: false,
-        isSuccess: false,
-        message,
-      });
-      toast.error(message);
-    }
-  },
-
-  getDocument: async (id: string) => {
-    try {
-      set({ isLoading: true });
-      const doc = await docService.getDocument(id);
-      set({
-        isLoading: false,
-        isSuccess: true,
-      });
-      return doc;
+      toast.success("Board created successfully!");
+      return board;
     } catch (error: any) {
       const message =
         (error.response &&
@@ -147,15 +69,91 @@ export const useDocStore = create<DocState>((set) => ({
     }
   },
 
-  updateDocument: async (id, docData) => {
+  getUserBoards: async () => {
     try {
-      // Optimistic update could be done here, but for now simple await
-      const updatedDoc = await docService.updateDocument(id, docData);
+      set({ isLoading: true });
+      const boards = await boardService.getUserBoards();
+      set({
+        boards,
+        isLoading: false,
+        isSuccess: true,
+      });
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({
+        isError: true,
+        isLoading: false,
+        isSuccess: false,
+        message,
+      });
+      toast.error(message);
+    }
+  },
+
+  getBoard: async (id: string) => {
+    try {
+      set({ isLoading: true });
+      const board = await boardService.getBoard(id);
+      set({
+        currentBoard: board,
+        isLoading: false,
+        isSuccess: true,
+      });
+      return board;
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      set({
+        isError: true,
+        isLoading: false,
+        isSuccess: false,
+        message,
+      });
+      toast.error(message);
+      return null;
+    }
+  },
+
+  updateBoard: async (id, boardData) => {
+    try {
+      const updatedBoard = await boardService.updateBoard(id, boardData);
       set((state) => ({
-        documents: state.documents.map((doc) =>
-          doc._id === id ? { ...doc, ...updatedDoc } : doc
+        boards: state.boards.map((board) =>
+          board._id === id ? { ...board, ...updatedBoard } : board
         ),
+        currentBoard:
+          state.currentBoard?._id === id
+            ? { ...state.currentBoard, ...updatedBoard }
+            : state.currentBoard,
       }));
+      toast.success("Board updated!");
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      toast.error(message);
+    }
+  },
+
+  deleteBoard: async (id) => {
+    try {
+      await boardService.deleteBoard(id);
+      set((state) => ({
+        boards: state.boards.filter((board) => board._id !== id),
+      }));
+      toast.success("Board deleted");
     } catch (error: any) {
       const message =
         (error.response &&

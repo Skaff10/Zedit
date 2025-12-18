@@ -1,18 +1,30 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { CreateBoardModal } from "./CreateBoardModal";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDocStore } from "../store/docStore";
+import { useBoardStore } from "../store/boardStore";
+import { Sidebar } from "./Sidebar";
+import { IoArrowBack } from "react-icons/io5";
 
-export const Board: React.FC = () => {
+interface BoardViewProps {
+  boardId?: string;
+}
+
+export const BoardView: React.FC<BoardViewProps> = () => {
+  const { boardId } = useParams<{ boardId: string }>();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [boardKey, setBoardKey] = React.useState(0);
-  const { documents, getUserDocuments, updateDocument } = useDocStore();
+  const { documents, getDocumentsByBoard, updateDocument } = useDocStore();
+  const { currentBoard, getBoard } = useBoardStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    getUserDocuments();
-  }, [getUserDocuments]);
+    if (boardId) {
+      getBoard(boardId);
+      getDocumentsByBoard(boardId);
+    }
+  }, [boardId, getBoard, getDocumentsByBoard]);
 
   const handleCreateBoard = (boardName: string) => {
     console.log("Creating board:", boardName);
@@ -22,19 +34,17 @@ export const Board: React.FC = () => {
 
   const handleDragEnd = async (docId: string, info: any) => {
     const x = info.point.x;
-    // Simple improved heuristic for column detection based on screen width shares
-    // This assumes 3 generic columns. A more robust solution uses DOM refs.
     const screenWidth = window.innerWidth;
     const colWidth = screenWidth / 3;
 
     let newStatus = "";
     if (x < colWidth) newStatus = "draft";
     else if (x < colWidth * 2) newStatus = "review";
-    else newStatus = "published"; // or stable
+    else newStatus = "published";
 
-    if (newStatus) {
+    if (newStatus && boardId) {
       await updateDocument(docId, { status: newStatus });
-      getUserDocuments(); // Refresh to ensure UI sync
+      getDocumentsByBoard(boardId);
     }
   };
 
@@ -45,54 +55,71 @@ export const Board: React.FC = () => {
   );
 
   return (
-    <div className="flex-1 p-8 overflow-x-hidden relative h-[calc(100vh-4rem)]">
-      <CreateBoardModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onCreate={handleCreateBoard}
-      />
+    <div className="flex min-h-screen bg-z-gray dark:bg-[#0a0a0a] transition-colors duration-300">
+      <Sidebar />
+      <div className="flex-1 ml-16 p-8 overflow-x-hidden relative h-[calc(100vh-4rem)]">
+        <CreateBoardModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onCreate={handleCreateBoard}
+        />
 
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-z-text dark:text-white">
-          Z-Board
-        </h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-z-blue text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer"
-        >
-          <span>+</span> New Board
-        </button>
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/folders")}
+              className="p-2 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
+            >
+              <IoArrowBack className="text-xl text-z-text" />
+            </button>
+            <h1 className="text-2xl font-bold text-z-text dark:text-white">
+              {currentBoard?.name || "Z-Board"}
+            </h1>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={boardKey}
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -300, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 100, damping: 25 }}
+            className="flex gap-6 h-full min-w-[800px] overflow-x-auto"
+          >
+            <Column title="Drafts" status="draft" onDrop={handleDragEnd}>
+              <NewZeditCard boardId={boardId} />
+              {drafts.map((doc) => (
+                <ProjectCard
+                  key={doc._id}
+                  doc={doc}
+                  onDragEnd={handleDragEnd}
+                />
+              ))}
+            </Column>
+
+            <Column title="In Review" status="review" onDrop={handleDragEnd}>
+              {inReview.map((doc) => (
+                <ProjectCard
+                  key={doc._id}
+                  doc={doc}
+                  onDragEnd={handleDragEnd}
+                />
+              ))}
+            </Column>
+
+            <Column title="Published" status="published" onDrop={handleDragEnd}>
+              {published.map((doc) => (
+                <ProjectCard
+                  key={doc._id}
+                  doc={doc}
+                  onDragEnd={handleDragEnd}
+                />
+              ))}
+            </Column>
+          </motion.div>
+        </AnimatePresence>
       </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={boardKey}
-          initial={{ x: 300, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -300, opacity: 0 }}
-          transition={{ type: "spring", stiffness: 100, damping: 25 }}
-          className="flex gap-6 h-full min-w-[800px] overflow-x-auto"
-        >
-          <Column title="Drafts" status="draft" onDrop={handleDragEnd}>
-            <NewZeditCard />
-            {drafts.map((doc) => (
-              <ProjectCard key={doc._id} doc={doc} onDragEnd={handleDragEnd} />
-            ))}
-          </Column>
-
-          <Column title="In Review" status="review" onDrop={handleDragEnd}>
-            {inReview.map((doc) => (
-              <ProjectCard key={doc._id} doc={doc} onDragEnd={handleDragEnd} />
-            ))}
-          </Column>
-
-          <Column title="Published" status="published" onDrop={handleDragEnd}>
-            {published.map((doc) => (
-              <ProjectCard key={doc._id} doc={doc} onDragEnd={handleDragEnd} />
-            ))}
-          </Column>
-        </motion.div>
-      </AnimatePresence>
     </div>
   );
 };
@@ -120,13 +147,13 @@ const Column: React.FC<{
   );
 };
 
-const NewZeditCard = () => {
+const NewZeditCard: React.FC<{ boardId?: string }> = ({ boardId }) => {
   const navigate = useNavigate();
 
   return (
     <motion.button
       layoutId="focus-editor-new"
-      onClick={() => navigate("/focus")}
+      onClick={() => navigate(`/focus?boardId=${boardId}`)}
       className="h-32 w-full border-2 border-dashed border-gray-200 dark:border-neutral-700 rounded-xl flex flex-col items-center justify-center text-gray-400 dark:text-neutral-500 hover:border-z-blue hover:text-z-blue hover:bg-blue-50 dark:hover:bg-red-900/20 transition-colors group cursor-pointer bg-white dark:bg-[#171717] shrink-0"
     >
       <motion.span
@@ -183,7 +210,6 @@ const ProjectCard: React.FC<{
         </div>
       ) : (
         <div className="flex -space-x-2 mb-3">
-          {/* Mock authors for now as API might not return full populated paths yet */}
           <div className="w-6 h-6 rounded-full border-2 border-white bg-blue-100 text-[10px] flex items-center justify-center font-bold text-blue-600">
             {doc.owner?.name?.[0] || "U"}
           </div>
@@ -196,3 +222,5 @@ const ProjectCard: React.FC<{
     </motion.div>
   );
 };
+
+export default BoardView;

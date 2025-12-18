@@ -1,17 +1,13 @@
 import React from "react";
 import { Sidebar } from "../components/Sidebar";
-import { Board } from "../components/Board";
+import { Workplace } from "../components/Workplace";
 import { useAuthStore } from "../store/authStore";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export const Home: React.FC = () => {
-
-
   const navigate = useNavigate();
-  const { user, isLoading, isError, isSuccess, message, register, login, logout, reset } =
-    useAuthStore();
-
+  const { user, isError, message, reset } = useAuthStore();
 
   useEffect(() => {
     if (isError) {
@@ -23,15 +19,13 @@ export const Home: React.FC = () => {
     }
 
     reset();
-  }, [user, isError, isSuccess, message, navigate, reset]);
+  }, [user, isError, message, navigate, reset]);
 
   return (
-    
-    <div className="flex min-h-screen bg-z-gray">
+    <div className="flex min-h-screen bg-z-gray dark:bg-[#0a0a0a] transition-colors duration-300">
       <Sidebar />
       <div className="flex-1 flex ml-16">
-        <Board />
-    
+        <Workplace />
       </div>
     </div>
   );

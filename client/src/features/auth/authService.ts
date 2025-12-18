@@ -25,10 +25,47 @@ const logout = () => {
   localStorage.removeItem("user");
 };
 
+const updateProfile = async (formData: FormData, token: string) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "multipart/form-data",
+    },
+  };
+  const response = await axios.put(API_URL + "profile", formData, config);
+  if (response.data) {
+    localStorage.setItem("user", JSON.stringify(response.data));
+  }
+  return response.data;
+};
+
+const updatePassword = async (passwordData: any, token: string) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axios.put(API_URL + "password", passwordData, config);
+  return response.data;
+};
+
+const updateTheme = async (theme: string, token: string) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axios.put(API_URL + "theme", { theme }, config);
+  return response.data;
+};
+
 const authService = {
   register,
   login,
   logout,
+  updateProfile,
+  updatePassword,
+  updateTheme,
 };
 
 export default authService;

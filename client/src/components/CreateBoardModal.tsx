@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IoClose } from "react-icons/io5";
+import { useBoardStore } from "../store/boardStore";
+import { useNavigate } from "react-router-dom";
 
 interface CreateBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (boardName: string) => void;
+  onCreate?: (boardName: string) => void;
 }
 
 export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
@@ -16,14 +18,32 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
   const [boardName, setBoardName] = useState("");
   const [collaborators, setCollaborators] = useState("");
   const [isPrivate, setIsPrivate] = useState(true);
+  const { createBoard, isLoading } = useBoardStore();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onCreate(boardName);
-    // Reset form
-    setBoardName("");
-    setCollaborators("");
-    setIsPrivate(true);
+
+    const board = await createBoard({
+      name: boardName || "Untitled Board",
+      isPrivate,
+    });
+
+    if (board) {
+      // Reset form
+      setBoardName("");
+      setCollaborators("");
+      setIsPrivate(true);
+      onClose();
+
+      // Navigate to the new board
+      navigate(`/board/${board._id}`);
+
+      // Call optional callback
+      if (onCreate) {
+        onCreate(boardName);
+      }
+    }
   };
 
   return (
@@ -50,7 +70,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
             <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 pointer-events-auto mx-4">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-800">
-                  Create Workspace
+                  Create Board
                 </h2>
                 <button
                   onClick={onClose}
@@ -63,7 +83,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
               <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Name
+                    Board Name
                   </label>
                   <input
                     type="text"
@@ -109,9 +129,10 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({
 
                 <button
                   type="submit"
-                  className="cursor-pointer w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200"
+                  disabled={isLoading}
+                  className="cursor-pointer w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Create Board
+                  {isLoading ? "Creating..." : "Create Board"}
                 </button>
               </form>
             </div>

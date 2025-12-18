@@ -12,6 +12,7 @@ const createDocument = async (docData: {
   title: string;
   content: object;
   status: string;
+  boardId?: string;
 }) => {
   const token = getToken();
   const config = {
@@ -20,6 +21,17 @@ const createDocument = async (docData: {
     },
   };
   const response = await axios.post(API_URL, docData, config);
+  return response.data;
+};
+
+const getDocumentsByBoard = async (boardId: string) => {
+  const token = getToken();
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await axios.get(API_URL + "board/" + boardId, config);
   return response.data;
 };
 
@@ -62,6 +74,7 @@ const updateDocument = async (
 const docService = {
   createDocument,
   getUserDocuments,
+  getDocumentsByBoard,
   getDocument,
   updateDocument,
 };

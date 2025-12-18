@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-z-blue: #2563eb;
   --color-z-dark: #0f172a;
@@ -7,10 +9,21 @@
   --color-z-text: #1f2937;
   --color-z-text-secondary: #6b7280;
   --color-z-sidebar: #1e293b;
+  --color-z-dark-sidebar: #7f1d1d;
+  --color-z-dark-body: #0a0a0a;
+  --color-z-dark-card: #171717;
+  --color-z-dark-input: #262626;
 }
 
 body {
-  @apply bg-z-gray text-z-text font-sans antialiased;
+  @apply bg-z-gray text-z-text font-sans antialiased transition-colors duration-300;
+}
+
+.dark body,
+body.dark,
+html.dark body {
+  background-color: var(--color-z-dark-body);
+  color: #f5f5f5;
 }
 
 .tiptap-editor .ProseMirror {

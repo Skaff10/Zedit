@@ -26,9 +26,14 @@ const documentSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  boardId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Board",
+    default: null,
+  },
   status: {
     type: String,
-    enum: ["draft", "review", "published", "stable"],
+    enum: ["draft", "in review", "published", "stable"],
     default: "draft",
   },
 });
