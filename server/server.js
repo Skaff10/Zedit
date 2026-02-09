@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/api/users", require("./routes/authRoutes"));
 app.use("/api/docs", require("./routes/docRoutes"));
 app.use("/api/boards", require("./routes/boardRoutes"));
+app.use("/api/ai", require("./routes/aiRoutes"));
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`.green);

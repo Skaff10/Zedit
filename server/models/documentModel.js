@@ -4,7 +4,7 @@ const collaboratorSchema = new mongoose.Schema(
   {
     userId: { type: String, enum: ["view", "edit"], default: "view" },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const documentSchema = mongoose.Schema({
@@ -33,7 +33,7 @@ const documentSchema = mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["draft", "in review", "published", "stable"],
+    enum: ["draft", "review", "in review", "published", "stable"],
     default: "draft",
   },
 });

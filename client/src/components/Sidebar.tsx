@@ -5,37 +5,53 @@ import { LuSettings as SettingsIcon } from "react-icons/lu";
 import logo from "/logo.png";
 import { useNavigate, useLocation } from "react-router-dom";
 
-export const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onBeforeNavigate?: () => Promise<void> | void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onBeforeNavigate }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleNavigate = async (path: string) => {
+    console.log(`Sidebar: Navigating to ${path}`);
+    if (onBeforeNavigate) {
+      try {
+        await onBeforeNavigate();
+      } catch (err) {
+        console.error("Sidebar: Save before navigation failed:", err);
+      }
+    }
+    navigate(path);
+  };
+
   return (
     <div className="w-16 bg-z-dark dark:bg-[#7f1d1d] h-screen flex flex-col items-center py-6 border-r border-gray-800 dark:border-red-900 fixed left-0 top-0 z-50 transition-colors duration-300">
-      <div className="mb-8 cursor-pointer" onClick={() => navigate("/")}>
+      <div className="mb-8 cursor-pointer" onClick={() => handleNavigate("/")}>
         <img src={logo} alt="" />
       </div>
 
       <nav className="flex flex-col gap-6 w-full items-center ">
         <NavItem
           active={isActive("/")}
-          onClick={() => navigate("/")}
+          onClick={() => handleNavigate("/")}
           icon={<HomeIcon />}
         />
         <NavItem
           active={isActive("/users")}
-          onClick={() => navigate("/users")}
+          onClick={() => handleNavigate("/users")}
           icon={<UsersIcon />}
         />
         <NavItem
           active={isActive("/folders")}
-          onClick={() => navigate("/folders")}
+          onClick={() => handleNavigate("/folders")}
           icon={<FolderIcon />}
         />
         <NavItem
           active={isActive("/settings")}
-          onClick={() => navigate("/settings")}
+          onClick={() => handleNavigate("/settings")}
           icon={<SettingsIcon />}
         />
       </nav>

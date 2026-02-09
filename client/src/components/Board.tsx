@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { CreateBoardModal } from "./CreateBoardModal";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ export const Board: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [boardKey, setBoardKey] = React.useState(0);
   const { documents, getUserDocuments, updateDocument } = useDocStore();
-  const navigate = useNavigate();
 
   useEffect(() => {
     getUserDocuments();
@@ -41,7 +40,7 @@ export const Board: React.FC = () => {
   const drafts = documents.filter((d) => d.status === "draft");
   const inReview = documents.filter((d) => d.status === "review");
   const published = documents.filter(
-    (d) => d.status === "published" || d.status === "stable"
+    (d) => d.status === "published" || d.status === "stable",
   );
 
   return (
